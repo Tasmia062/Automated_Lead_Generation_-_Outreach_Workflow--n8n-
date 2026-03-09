@@ -1,0 +1,1581 @@
+{
+  "name": "Yoga Email Campaign - Optional Vouchers",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2025962560,
+          "mode": "list"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "id": "8ffb6c7f-6569-4411-aecd-c88345a77973",
+      "name": "Google Sheets Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        12736
+      ],
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_TRIGGER_CREDENTIAL_ID",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "city",
+              "value": "={{ $json.city }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "eventName",
+              "value": "={{ $json.eventName }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "eventLink",
+              "value": "={{ $json.eventLink }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "searchKeyword",
+              "value": "={{ $json.searchKeyword }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "googleMapsApiKey",
+              "value": "YOUR_GOOGLE_MAPS_API_KEY",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5da79081-f563-474a-a6c0-7b38f4956fe6",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        12736
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://maps.googleapis.com/maps/api/place/textsearch/json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.searchKeyword + ' in ' + $json.city }}"
+            },
+            {
+              "name": "key",
+              "value": "={{ $json.googleMapsApiKey }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2b599dbc-ec9b-4e14-a52b-b901bd141c91",
+      "name": "Google Text Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        288,
+        12736
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "id": "289816d7-2e4a-4dd4-a44b-2ee7acf69ac1",
+      "name": "Split Search Results",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        512,
+        12736
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://maps.googleapis.com/maps/api/place/details/json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "place_id",
+              "value": "={{ $json.place_id }}"
+            },
+            {
+              "name": "fields",
+              "value": "name,website,formatted_phone_number"
+            },
+            {
+              "name": "key",
+              "value": "={{ $('Workflow Configuration').item.json.googleMapsApiKey }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "904fd59a-3ec1-4e24-bcf4-fcd8af3be762",
+      "name": "Get Place Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        736,
+        12736
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "name",
+              "value": "={{ $('Get Place Details').item.json.result.name }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "website",
+              "value": "={{ $('Get Place Details').item.json.result.website }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "phone",
+              "value": "={{ $('Get Place Details').item.json.result.formatted_phone_number }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "place_id",
+              "value": "={{ $('Split Search Results').item.json.place_id }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "formatted_address",
+              "value": "={{ $('Split Search Results').item.json.formatted_address }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "rating",
+              "value": "={{ $('Split Search Results').item.json.rating }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2059efd4-6c25-46c6-8de3-3c1d8004b49f",
+      "name": "Extract Basic Lead Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        976,
+        12736
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.website }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists"
+              }
+            },
+            {
+              "id": "id-2",
+              "leftValue": "={{ $json.website }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d0da09ec-f8fa-4fc7-9667-84a734a8ab92",
+      "name": "Check If Website Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        12736
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Extract Basic Lead Info').item.json.website }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            },
+            {
+              "name": "Referer",
+              "value": "https://www.google.com/"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip, deflate, br"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Upgrade-Insecure-Requests",
+              "value": "1"
+            },
+            {
+              "name": "Sec-Fetch-Dest",
+              "value": "document"
+            },
+            {
+              "name": "Sec-Fetch-Mode",
+              "value": "navigate"
+            },
+            {
+              "name": "Sec-Fetch-Site",
+              "value": "none"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "max-age=0"
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "653a6574-908e-4991-ad22-4b3cfa1e17a2",
+      "name": "Fetch Website HTML",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1424,
+        12560
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const html = $input.item.json.data || '';\n\n// Email regex pattern\nconst emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g;\n\n// Social media regex patterns\nconst linkedinRegex = /https?:\\/\\/(www\\.)?linkedin\\.com\\/(?:company\\/|in\\/)[a-zA-Z0-9_-]+\\/?/gi;\nconst facebookRegex = /https?:\\/\\/(www\\.)?facebook\\.com\\/[a-zA-Z0-9._-]+\\/?/gi;\nconst instagramRegex = /https?:\\/\\/(www\\.)?instagram\\.com\\/[a-zA-Z0-9._]+\\/?/gi;\n\n// Extract all emails from HTML\nconst emails = html.match(emailRegex) || [];\n\n// Remove duplicates\nconst uniqueEmails = [...new Set(emails)];\n\n// Filter out common false positives\nconst validEmails = uniqueEmails.filter(email => \n  !email.includes('example.com') &&\n  !email.includes('sentry.io') &&\n  !email.includes('png') &&\n  !email.includes('jpg') &&\n  !email.includes('jpeg') &&\n  !email.includes('gif') &&\n  !email.includes('svg') &&\n  !email.includes('woff') &&\n  !email.includes('woff2') &&\n  !email.includes('.css') &&\n  !email.includes('.js')\n);\n\n// Extract social media URLs\nconst linkedinUrls = html.match(linkedinRegex) || [];\nconst facebookUrls = html.match(facebookRegex) || [];\nconst instagramUrls = html.match(instagramRegex) || [];\n\n// Remove duplicates from social media URLs\nconst uniqueLinkedin = [...new Set(linkedinUrls)];\nconst uniqueFacebook = [...new Set(facebookUrls)];\nconst uniqueInstagram = [...new Set(instagramUrls)];\n\n// Return the first valid email or empty string\nconst email = validEmails.length > 0 ? validEmails[0] : '';\nconst linkedin = uniqueLinkedin.length > 0 ? uniqueLinkedin[0] : '';\nconst facebook = uniqueFacebook.length > 0 ? uniqueFacebook[0] : '';\nconst instagram = uniqueInstagram.length > 0 ? uniqueInstagram[0] : '';\n\nreturn {\n  email: email,\n  allEmails: validEmails.join(', '),\n  emailCount: validEmails.length,\n  linkedin: linkedin,\n  facebook: facebook,\n  instagram: instagram\n};"
+      },
+      "id": "588cab7a-19e4-42a6-b3a1-188b70698be7",
+      "name": "Extract Email from HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        12560
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "name",
+              "value": "={{ $('Extract Basic Lead Info').item.json.name || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "website",
+              "value": "={{ $('Extract Basic Lead Info').item.json.website || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "phone",
+              "value": "={{ $('Extract Basic Lead Info').item.json.phone || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "place_id",
+              "value": "={{ $('Extract Basic Lead Info').item.json.place_id || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "formatted_address",
+              "value": "={{ $('Extract Basic Lead Info').item.json.formatted_address || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "rating",
+              "value": "={{ $('Extract Basic Lead Info').item.json.rating || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "id-7",
+              "name": "email",
+              "value": "={{ $json.email || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-8",
+              "name": "LinkedIn",
+              "value": "={{ $json.linkedin || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-9",
+              "name": "Facebook",
+              "value": "={{ $json.facebook || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-10",
+              "name": "Instagram",
+              "value": "={{ $json.instagram || 'N/A' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a4b230f6-adbc-4042-bc51-912346d8d01d",
+      "name": "Add Email to Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1888,
+        12560
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "includeUnpaired": true
+        }
+      },
+      "id": "bb1940c2-efa2-4dd9-8998-98896137cd0d",
+      "name": "Merge Leads With and Without Emails",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2096,
+        12736
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "Business Name",
+              "value": "={{ $json.name || $json['Business Name'] || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "Website",
+              "value": "={{ $json.website || $json['Website'] || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "Phone",
+              "value": "={{ $json.phone || $json['Phone'] || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "Email",
+              "value": "={{ $json.email || $json['Email'] || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "Address",
+              "value": "={{ $json.formatted_address || $json['Address'] || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "Rating",
+              "value": "={{ $json.rating || $json['Rating'] || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-7",
+              "name": "Google Maps URL",
+              "value": "={{ $json.place_id ? 'https://www.google.com/maps/place/?q=place_id:' + $json.place_id : ($json['Google Maps URL'] || 'N/A') }}",
+              "type": "string"
+            },
+            {
+              "id": "id-8",
+              "name": "LinkedIn",
+              "value": "={{ $json.linkedin || $json['LinkedIn'] || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-9",
+              "name": "Facebook",
+              "value": "={{ $json.facebook || $json['Facebook'] || 'N/A' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-10",
+              "name": "Instagram",
+              "value": "={{ $json.instagram || $json['Instagram'] || 'N/A' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cf328cff-3daf-4a7d-9628-d3445b1246c3",
+      "name": "Format for Google Sheets",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2320,
+        12736
+      ]
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "Business Name",
+        "options": {}
+      },
+      "id": "8374f863-e157-45e9-9f79-ebe943014aa6",
+      "name": "Remove Duplicate Leads",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        2544,
+        12736
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Voucher Code",
+              "displayName": "Voucher Code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Business Name",
+              "displayName": "Business Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Rating",
+              "displayName": "Rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date Sent",
+              "displayName": "Date Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Google Maps URL",
+              "displayName": "Google Maps URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LinkedIn",
+              "displayName": "LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Facebook",
+              "displayName": "Facebook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Instagram",
+              "displayName": "Instagram",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "9c8623fe-35ac-4fe1-9148-c67b20e9eb66",
+      "name": "Store Leads in Google Sheet1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2800,
+        12736
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "YOUR_GOOGLE_SHEETS_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "1st:   Final Workflow ",
+        "height": 80,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -432,
+        12736
+      ],
+      "typeVersion": 1,
+      "id": "284ea13f-1630-4e52-894d-35ee6d009132",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {},
+      "id": "fce1643b-8a29-4cdd-958a-dc740c4ea080",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        13184
+      ]
+    },
+    {
+      "parameters": {
+        "content": "2nd: Final    workflow    ",
+        "height": 80,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -528,
+        13216
+      ],
+      "typeVersion": 1,
+      "id": "585c8b57-f0df-417e-935a-acd123adb3b5",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json['Voucher Code'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "509811bf-b226-4490-9d7f-409c535a2fb8",
+      "name": "Has Voucher Code?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        688,
+        13184
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "discount_code",
+              "value": "={{ { \"code\": \"\" } }}",
+              "type": "object"
+            },
+            {
+              "id": "id-2",
+              "name": "has_voucher",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "id-3",
+              "name": "message",
+              "value": "No voucher code - skipping Shopify",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "50841251-4c4f-4bcc-be43-0ca92f82c4b5",
+      "name": "No Voucher - Skip Shopify1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        13408
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "includeUnpaired": true
+        }
+      },
+      "id": "a8faf8f2-74e8-4b67-bdb3-b789c466a423",
+      "name": "Merge Voucher Paths1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1712,
+        13200
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "id": "e08a0fcd-5ba3-4062-a354-013adf32ad5b",
+      "name": "Read Approved Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        128,
+        13184
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "YOUR_GOOGLE_SHEETS_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "3539f05b-b223-4c7b-b72b-f39426bb875e",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1872,
+        13392
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "YOUR_OPENAI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "id": "429258a9-9d1d-419c-823c-019b8664ecff",
+      "name": "Delay Between Emails",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2880,
+        13200
+      ],
+      "webhookId": "e3d9140a-7a04-47dd-b12c-ca4b16c23d01"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Code in JavaScript').item.json.recipientEmail }}",
+            "Voucher Code": "={{ $('Code in JavaScript').item.json.voucherCode }}",
+            "Date Sent": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Voucher Code",
+              "displayName": "Voucher Code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Date Sent",
+              "displayName": "Date Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "186f7603-c921-4b4f-9988-e9ea83b56e77",
+      "name": "Update Lead Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3152,
+        13200
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "YOUR_GOOGLE_SHEETS_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate the email exactly as written in the Google Sheet template.\n\nSTRICT EXECUTION RULES\n\n1. The Email Template field is the single source of truth.\n2. Do not rewrite, reformat, improve, shorten, or expand anything.\n3. Preserve all text exactly as provided, including:\n   - subject line\n   - greeting wording\n   - emojis\n   - punctuation\n   - spacing\n   - line breaks\n   - PS sections\n   - links\n   - capitalization\n4. Replace variables only.\n5. Do not add any text.\n6. Do not remove any text.\n7. Do not explain anything.\n8. Output only the final email.\n9. SPECIAL RULE: If Voucher Code is empty, \"NONE\", or not provided, completely remove any sentences or paragraphs that mention voucher codes or discounts. Do NOT leave placeholder text.\n\nVARIABLES TO REPLACE\n\nBusiness Name: {{ $('Read Approved Leads').item.json[\"Business Name\"] }}\nVoucher Code: {{ $('Read Approved Leads').item.json['Voucher Code'] || 'NONE' }}\nEvent Link: {{ $('Get row(s) in sheet').item.json.eventLink }}\n\nSOURCE TEMPLATE\n\n{{ $('Get row(s) in sheet').item.json['Email Template'] }}\n\nCONDITIONAL LOGIC\n\nIf Voucher Code is \"NONE\" or empty:\n- Remove any sentences mentioning voucher codes\n- Remove any sentences mentioning discount codes\n- Do NOT output \"Your voucher code is NONE\"\n- Simply skip those sections entirely\n\nIf Voucher Code exists:\n- Include the voucher code sections as written in template\n\nFINAL INSTRUCTION\n\nReturn the Email Template exactly as provided, with only the variables replaced by their values.\n",
+        "options": {
+          "systemMessage": "You are a professional email marketing specialist who writes personalized, engaging emails that convert. Your emails are warm, authentic, and never sound like spam. You follow instructions precisely and never add or remove content unless explicitly told to do so."
+        }
+      },
+      "id": "6bc23433-b491-45ef-9b2c-d2ae558b11c5",
+      "name": "Generate Personalized Email",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1904,
+        13200
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code in JavaScript').item.json.recipientEmail }}",
+        "subject": "={{ $json.emailSubject }}",
+        "message": "={{ $json.emailBody }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Adrian from Breathing Concerts"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2656,
+        13200
+      ],
+      "id": "1ba5e1d5-b7f2-44a2-9912-3b64a8939fad",
+      "name": "Send a message",
+      "webhookId": "656d6017-a2d8-499e-a5c7-c9fe22189dcb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "YOUR_GMAIL_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_SUBDOMAIN.myshopify.com/admin/oauth/access_token",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "client_credentials"
+            },
+            {
+              "name": "client_id",
+              "value": "YOUR_SHOPIFY_CLIENT_ID"
+            },
+            {
+              "name": "client_secret",
+              "value": "YOUR_SHOPIFY_CLIENT_SECRET"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        992,
+        13184
+      ],
+      "id": "3b8bb080-70b5-46a4-bf6b-19392b1fe005",
+      "name": "Shopify access token"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_SUBDOMAIN.myshopify.com/admin/api/2024-01/price_rules.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"price_rule\": {\n    \"title\": \"{{ $('Read Approved Leads').item.json.Email }} - Berlin - {{ $('Read Approved Leads').item.json['Voucher Code'] }} - {{ $now.toFormat('yyyy-MM-dd') }}\",\n    \"target_type\": \"line_item\",\n    \"target_selection\": \"all\",\n    \"allocation_method\": \"across\",\n    \"value_type\": \"percentage\",\n    \"value\": \"-10.0\",\n    \"customer_selection\": \"all\",\n    \"starts_at\": \"{{ $now.toISO() }}\",\n    \"ends_at\": \"{{ $now.plus({days: 30}).toISO() }}\",\n    \"usage_limit\": 1\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1232,
+        13184
+      ],
+      "id": "a206e735-ca93-47c6-87f9-92a4a603c47f",
+      "name": "Generate Voucher Code (Create Price Rule)1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_SHOPIFY_CREDENTIAL_ID",
+          "name": "YOUR_SHOPIFY_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://YOUR_SUBDOMAIN.myshopify.com/admin/api/2024-01/price_rules/{{ $json.price_rule.id }}/discount_codes.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"discount_code\": {\n    \"code\": \"{{ $('Read Approved Leads').item.json['Voucher Code'] }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1472,
+        13184
+      ],
+      "id": "4513a8fd-886a-4625-b940-85fbf0b0b853",
+      "name": "Create Discount Code",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_SHOPIFY_CREDENTIAL_ID",
+          "name": "YOUR_SHOPIFY_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputItems = $input.all();\nconst leadItems = $('Read Approved Leads').all();\nlet discountItems = [];\ntry {\n  discountItems = $('Create Discount Code').all();\n} catch (error) {\n  console.log('No discount codes created (optional vouchers)');\n}\nreturn inputItems.map((item, index) => {\n  const prepareData = item.json || {};\n  const leadData = leadItems[index]?.json || {};\n  const discountCode = discountItems[index]?.json?.discount_code?.code || '';\n  let emailBody = prepareData.emailBody ?? '';\n  if (typeof emailBody !== 'string') emailBody = String(emailBody);\n  emailBody = emailBody.replace(/\\r\\n/g, '\\n').replace(/\\r/g, '\\n');\n  const paragraphs = emailBody.split('\\n').map(line => line.trim()).filter(Boolean);\n  const htmlEmail = `<html><body style=\"font-family: Arial, sans-serif; line-height: 1.8; color: #333;\">${paragraphs.map(p => `<p style=\"margin:15px 0;\">${p}</p>`).join('')}</body></html>`;\n  return {\n    json: {\n      emailSubject: prepareData.emailSubject ?? '',\n      emailBody: htmlEmail,\n      recipientEmail: prepareData.recipientEmail ?? '',\n      recipientName: prepareData.recipientName ?? '',\n      Email: leadData.Email ?? '',\n      voucherCode: discountCode ? discountCode.toString().trim() : '',\n      dateSent: new Date().toISOString(),\n      rowNumber: leadData.row_number ?? null,\n      eventLink: prepareData.eventLink ?? leadData.eventLink ?? ''\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2416,
+        13200
+      ],
+      "id": "ecc47a5b-9dc5-43b4-8763-7978034635cf",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "emailSubject",
+              "value": "={{ $json.output.match(/SUBJECT:\\s*(.*)/)?.[1] || 'Exclusive Yoga Concert Invitation' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "emailBody",
+              "value": "={{ $json.output.replace(/SUBJECT:.*\\n/i, '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "recipientEmail",
+              "value": "={{ $('Read Approved Leads').item.json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "recipientName",
+              "value": "={{ $('Read Approved Leads').item.json[\"Business Name\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "voucherCode",
+              "value": "={{ $('Read Approved Leads').item.json['Voucher Code'] }}",
+              "type": "string"
+            },
+            {
+              "id": "b33099f8-0c29-4e22-a868-5979ee4c26f5",
+              "name": "eventLink",
+              "value": "={{ $('Get row(s) in sheet').item.json.eventLink }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "29f58808-5303-4005-ad7e-fa9808d8d87c",
+      "name": "Prepare Email Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2224,
+        13200
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2025962562,
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -64,
+        13184
+      ],
+      "id": "da036fcd-8719-49b6-a8a7-3da5479970b6",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "YOUR_GOOGLE_SHEETS_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.Status}}",
+              "rightValue": "Approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "id-2",
+              "leftValue": "={{ $json['Date Sent'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "809cf681-4b6c-4a50-a31e-7d20286d4c56",
+      "name": "Filter Approved Leads2",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        13184
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Google Text Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Text Search": {
+      "main": [
+        [
+          {
+            "node": "Split Search Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Search Results": {
+      "main": [
+        [
+          {
+            "node": "Get Place Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Place Details": {
+      "main": [
+        [
+          {
+            "node": "Extract Basic Lead Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Basic Lead Info": {
+      "main": [
+        [
+          {
+            "node": "Check If Website Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Website Exists": {
+      "main": [
+        [
+          {
+            "node": "Fetch Website HTML",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge Leads With and Without Emails",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Fetch Website HTML": {
+      "main": [
+        [
+          {
+            "node": "Extract Email from HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Email from HTML": {
+      "main": [
+        [
+          {
+            "node": "Add Email to Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Email to Lead": {
+      "main": [
+        [
+          {
+            "node": "Merge Leads With and Without Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Leads With and Without Emails": {
+      "main": [
+        [
+          {
+            "node": "Format for Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format for Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicate Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicate Leads": {
+      "main": [
+        [
+          {
+            "node": "Store Leads in Google Sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Voucher Code?1": {
+      "main": [
+        [
+          {
+            "node": "Shopify access token",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Voucher - Skip Shopify1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Voucher - Skip Shopify1": {
+      "main": [
+        [
+          {
+            "node": "Merge Voucher Paths1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Voucher Paths1": {
+      "main": [
+        [
+          {
+            "node": "Generate Personalized Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Approved Leads": {
+      "main": [
+        [
+          {
+            "node": "Filter Approved Leads2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Personalized Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delay Between Emails": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Personalized Email": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Delay Between Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shopify access token": {
+      "main": [
+        [
+          {
+            "node": "Generate Voucher Code (Create Price Rule)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Voucher Code (Create Price Rule)1": {
+      "main": [
+        [
+          {
+            "node": "Create Discount Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Discount Code": {
+      "main": [
+        [
+          {
+            "node": "Merge Voucher Paths1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Data": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Read Approved Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Approved Leads2": {
+      "main": [
+        [
+          {
+            "node": "Has Voucher Code?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "4c2ebba3-e2f1-4bb4-b8d2-4e4f0330e7e8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "87f3c43dca2c99193b948a4a14668bd64bc3f20e54a4372971f73484c92254a2"
+  },
+  "id": "r-ujxeGas92J0fpO03l7e",
+  "tags": []
+}
