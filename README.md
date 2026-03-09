@@ -108,8 +108,7 @@ Where extracted leads are stored.
 Example columns:
 
 <img width="868" height="23" alt="lead_info" src="https://github.com/user-attachments/assets/4a144a67-8da0-41af-a48b-d97a05c2375c" />
-
-<img width="868" height="23" alt="lead_info" src="https://github.com/user-attachments/assets/50d39b9b-f816-49c9-87fc-f0018e1bc106" />
+<img width="927" height="122" alt="leadinfo" src="https://github.com/user-attachments/assets/bf114d33-31af-461f-a953-ea2485f3dda1" />
 
 _____________________________________________________________________________________________________________________________
 
